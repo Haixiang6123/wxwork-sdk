@@ -172,4 +172,4 @@ $RECYCLE.BIN/
 *.lnk
 
 .idea
-./server/cache
+/server/cache.txt

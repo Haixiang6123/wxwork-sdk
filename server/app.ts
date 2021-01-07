@@ -18,10 +18,11 @@ let expires: string | null;
 
 [accessToken, expires] = fs.readFileSync(cacheUrl, 'utf8').split('\n');
 
+// 获取 access_token
 app.get('/gettoken', async (req, res) => {
   // 未过期
   if (expires && dayjs().diff(dayjs(expires)) < 0) {
-    return res.json({ code: 0, msg: '缓存中读取' });
+    return res.json({code: 0, msg: '缓存中读取'});
   }
 
   const params = {
@@ -34,10 +35,10 @@ app.get('/gettoken', async (req, res) => {
     params,
   })
 
-  const { access_token, expires_in, errmsg } = response.data;
+  const {access_token, expires_in, errmsg} = response.data;
 
   if (errmsg) {
-    return res.json({ code: 500, msg: '获取失败' });
+    return res.json({code: 500, msg: '获取失败'});
   }
 
   // 计算过期时间
@@ -49,8 +50,35 @@ app.get('/gettoken', async (req, res) => {
 
   fs.writeFileSync(cacheUrl, cacheText, 'utf8');
 
-  return res.json({ code: 0, msg: '企业微信中获取' });
+  return res.json({code: 0, msg: '企业微信中获取'});
 });
+
+// 获取企业 jsapi ticket
+app.get('/get_corp_jsapi_ticket', async (req, res) => {
+  const params = {access_token: accessToken};
+
+  const response = await axios.request({
+    ...routes.getCorpJsapiTicket,
+    params,
+  });
+
+  return res.json(response.data);
+});
+
+// 获取应用 jsapi ticket
+app.get('/get_app_jsapi_ticket', async (req, res) => {
+  const params = {
+    access_token: accessToken,
+    type: 'agent_config',
+  };
+
+  const response = await axios.request({
+    ...routes.getAppJsapiTicket,
+    params,
+  });
+
+  return res.json(response.data);
+})
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
